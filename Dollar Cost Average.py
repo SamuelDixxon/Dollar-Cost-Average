@@ -1,62 +1,19 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 13 13:14:25 2020
+from functions import *
+import os
 
-@author: Samuel Dixon
+DataOfConcern = DCA(3000, '2022-1-1', 'AAPL', 5)
 
-Dollar Cost Average Program
-"""
-from datetime import date
-import pandas as pd
-import yfinance as yf
-import pickle
+DataOfConcern.to_pickle(str(os.getcwd()) + "/DollarCostAverage.pkl")  # our data saved in file for practice
 
-
-
-def get_dframe(ticker, start, stop):
-    """
-    ticker: the stock ticker of interest, ex. apple: 'AAPL'
-    start: start of investment in string format, ex. Jan. 1, 2020: '2020-1-1'
-    stop:  current date in string format, ex. Aug. 13, 2020: '2020-8-13'
-    Return: Pandas data frame of stock ticker data history
-    """
-    tickerData = yf.Ticker(str(ticker))
-    return tickerData.history(period='1d', start=start, stop=stop)
-  
-
-
-def DCA(WeeklyContribution, InitialInvestmentDay, StockTicker): #Dollar Cost Average Function
-    """
-    WeeklyContribution : Floating-point value indicating the fiscal amount to invest each week
-    InitialInvestmentDay: String Value indicating initial day to be investing in the stock market: ex. Jan 1 2020: 2020-1-1
-    StockTicker : Enter the ticker of the stock that you are investing into: ex. Tesla: 'TSLA' (rem)
-    """
-    DataNeeded = get_dframe(StockTicker, InitialInvestmentDay, date.today)
-    Frequency = 5 # period of investing each week remeber market is closed on weekends
-    DCAdf = pd.DataFrame(data={"Contribution Weekly": [WeeklyContribution for i in range(0,len(DataNeeded), 5)],str(StockTicker)+" "+"Price":DataNeeded['Close'][0: -1 :Frequency]})
-    DCAdf['Number of Shares'] = (DataNeeded['Close'][0: -1 :Frequency]).rdiv(WeeklyContribution)
-    
-    return DCAdf
-
-DataOfConcern = DCA(3000, '2020-2-1', 'AAPL')
-
-DataOfConcern.to_pickle("C:/Users/15123/Desktop/DollarCostAverage.pkl")
-
-Total_Equity = DataOfConcern['AAPL Price'].tail(1) * DataOfConcern['Number of Shares'].sum()
-
-Total_Cost = DataOfConcern['Contribution Weekly'].sum()
-
+DataOfConcern['Cumulative Shares'] = DataOfConcern['Shares Bought in Week'].expanding().sum()
+Total_Equity = DataOfConcern['AAPL Price'][-1] * DataOfConcern['Cumulative Shares'][-1] # Latest Stock Price * Shares accumulated
+Total_Cost = DataOfConcern['Contribution Weekly'].sum() # 
 Total_Profit = Total_Equity-Total_Cost
+LumpSumInvestment = yf.download('AAPL', '2000-2-1', date.today())
 
-print("Your total profits over investment span are: $", Total_Profit)
+Total_Cost = DataOfConcern['Contribution Weekly'].sum() # get the total contribution to the investment account
+Total_Profit = (Total_Cost / LumpSumInvestment['Close'][0]) * LumpSumInvestment['Close'][-1] #
+
+print("Your total profits over investment span are: $", Total_Equity)
 
 
-
-    
-    
-    
-    
-    
-    
-    
-    
