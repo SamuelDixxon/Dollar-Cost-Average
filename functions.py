@@ -29,13 +29,12 @@ def DCA(WeeklyContribution, InitialInvestmentDay, StockTicker, Frequency):  # Do
         DCAdf['Cumulative Shares'][-1]
     Total_Cost = DCAdf['Contribution Weekly'].sum()
     Total_Profit = Total_Equity-Total_Cost
-    LumpSumInvestment = yf.download('AAPL', '2000-2-1', date.today())
+    #LumpSumInvestment = yf.download('AAPL', '2000-2-1', date.today())
 
     # get the total contribution to the investment account
     Total_Cost = DCAdf['Contribution Weekly'].sum()
     # Total profit over interval
-    Total_Profit = (
-        Total_Cost / LumpSumInvestment['Close'][0]) * LumpSumInvestment['Close'][-1]
+    Total_Profit = (Total_Equity-Total_Cost)
 
     return Total_Profit
 
